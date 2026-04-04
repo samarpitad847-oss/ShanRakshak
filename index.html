@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FirstReach — Emergency Community Response</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#e63946;--red-light:#fff1f2;--red-mid:#fecdd3;
+  --navy:#0f172a;--navy2:#1e293b;--navy3:#334155;
+  --green:#10b981;--green-light:#ecfdf5;
+  --amber:#f59e0b;--amber-light:#fffbeb;
+  --blue:#3b82f6;--blue-light:#eff6ff;
+  --white:#ffffff;--off:#f8fafc;--border:#e2e8f0;
+  --text:#0f172a;--muted:#64748b;--light:#94a3b8;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --shadow:0 1px 3px rgba(0,0,0,0.08);
+  --shadow-lg:0 10px 25px rgba(0,0,0,0.1);
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--text);background:var(--off);min-height:100vh;font-size:15px}
+.hidden{display:none!important}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+input,select,textarea{font-family:var(--font);outline:none}
+
+/* TOPBAR */
+#topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;gap:1rem}
+.logo{display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:1.1rem;color:var(--navy);flex-shrink:0;cursor:pointer}
+.logo-icon{width:32px;height:32px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:800}
+.logo span{color:var(--red)}
+.topbar-nav{display:flex;gap:0.2rem;align-items:center;flex-wrap:wrap}
+.nav-btn{padding:0.4rem 0.9rem;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:500;color:var(--muted);background:transparent;border:none;transition:all 0.15s}
+.nav-btn:hover{background:var(--off);color:var(--text)}
+.nav-btn.active{background:var(--off);color:var(--text);font-weight:600}
+.btn-report-nav{background:var(--red)!important;color:white!important;font-weight:700!important;animation:pulse-red 2s ease-in-out infinite}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0.35)}50%{box-shadow:0 0 0 5px rgba(230,57,70,0)}}
+.live-badge{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;color:var(--green);background:var(--green-light);padding:0.3rem 0.75rem;border-radius:99px;flex-shrink:0;border:1px solid #a7f3d0}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
+
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 60px)}
+.page.active{display:block}
+
+/* BUTTONS */
+.btn{padding:0.75rem 1.5rem;border-radius:var(--radius-sm);font-size:0.85rem;font-weight:700;border:none;cursor:pointer;transition:opacity 0.15s;font-family:var(--font)}
+.btn:hover{opacity:0.88}
+.btn-red{background:var(--red);color:white}
+.btn-green{background:var(--green);color:white}
+.btn-blue{background:var(--blue);color:white}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+.btn-outline:hover{border-color:var(--navy3);color:var(--navy)}
+.btn-full{width:100%}
+
+/* FORMS */
+.form-group{margin-bottom:1.1rem}
+.form-label{display:block;font-size:0.72rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em}
+.form-input{width:100%;padding:0.72rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text);background:var(--white);transition:border-color 0.15s}
+.form-input:focus{border-color:var(--red)}
+.form-select{width:100%;padding:0.72rem 1rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.85rem;color:var(--text);background:var(--white);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+.form-select:focus{border-color:var(--red)}
+.tag-pill{display:inline-block;padding:0.2rem 0.65rem;border-radius:99px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+.tag-pill.red{background:var(--red-light);color:var(--red)}
+.tag-pill.green{background:var(--green-light);color:var(--green)}
+.tag-pill.blue{background:var(--blue-light);color:var(--blue)}
+.tag-pill.amber{background:var(--amber-light);color:var(--amber)}
+
+/* ══ HOME ══ */
+.home-hero{background:linear-gradient(135deg,var(--navy) 0%,#1a2744 100%);color:white;padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(230,57,70,0.12) 0%,transparent 55%),radial-gradient(ellipse at 70% 50%,rgba(59,130,246,0.08) 0%,transparent 55%)}
+.hero-inner{position:relative;z-index:1;max-width:620px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3);border-radius:99px;padding:0.3rem 0.9rem;font-size:0.7rem;font-weight:700;color:#fca5a5;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1.5rem}
+.hero-badge-dot{width:6px;height:6px;background:#f87171;border-radius:50%;animation:blink 1.2s infinite}
+h1.hero-h{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:1rem}
+h1.hero-h em{color:#f87171;font-style:normal}
+.hero-p{color:#94a3b8;font-size:0.95rem;font-weight:300;line-height:1.7;margin-bottom:2rem;max-width:460px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+.hero-stats{display:flex;flex-wrap:wrap;gap:2rem;justify-content:center;border-top:1px solid rgba(255,255,255,0.07);padding-top:2rem}
+.hstat{text-align:center}
+.hstat-n{font-size:1.5rem;font-weight:800;color:white;line-height:1}
+.hstat-l{font-size:0.68rem;color:#475569;margin-top:0.15rem;text-transform:uppercase;letter-spacing:0.05em}
+.live-strip{background:var(--white);border-bottom:1px solid var(--border);padding:1.2rem 2rem}
+.ls-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem}
+.ls-head h3{font-size:0.85rem;font-weight:700;color:var(--navy)}
+.ls-items{display:flex;gap:0.9rem;overflow-x:auto;padding-bottom:0.3rem}
+.ls-item{flex-shrink:0;background:var(--off);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.85rem 1rem;min-width:190px;cursor:pointer;transition:border-color 0.15s}
+.ls-item:hover{border-color:var(--red)}
+.ls-type{font-size:0.65rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem}
+.ls-item.cardiac .ls-type{color:var(--red)}
+.ls-item.accident .ls-type{color:var(--amber)}
+.ls-item.seizure .ls-type{color:var(--blue)}
+.ls-loc{font-size:0.8rem;font-weight:600;color:var(--navy);margin-bottom:0.15rem}
+.ls-meta{font-size:0.7rem;color:var(--muted)}
+.ls-resp{font-size:0.7rem;color:var(--green);font-weight:600;margin-top:0.25rem}
+.role-section{padding:2.5rem 1.5rem;max-width:960px;margin:0 auto}
+.role-section-head{text-align:center;margin-bottom:1.8rem}
+.role-section-head h2{font-size:1.4rem;font-weight:800;color:var(--navy)}
+.role-section-head p{font-size:0.82rem;color:var(--muted);margin-top:0.3rem}
+.role-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.2rem}
+.role-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.8rem;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.role-card.public::before{background:var(--red)}
+.role-card.volunteer::before{background:var(--green)}
+.role-card.hospital::before{background:var(--blue)}
+.role-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.rc-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem}
+.role-card.public .rc-icon{background:var(--red-light)}
+.role-card.volunteer .rc-icon{background:var(--green-light)}
+.role-card.hospital .rc-icon{background:var(--blue-light)}
+.rc-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:0.35rem}
+.rc-desc{font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:1.2rem}
+.rc-btn{width:100%;padding:0.6rem;border-radius:var(--radius-sm);font-size:0.78rem;font-weight:700;border:none;cursor:pointer;font-family:var(--font)}
+.role-card.public .rc-btn{background:var(--red);color:white}
+.role-card.volunteer .rc-btn{background:var(--green);color:white}
+.role-card.hospital .rc-btn{background:var(--blue);color:white}
+
+/* ══ REPORT ══ */
+.report-wrap{max-width:560px;margin:0 auto;padding:2rem 1.5rem}
+.page-hdr{margin-bottom:1.8rem}
+.page-hdr-tag{font-size:0.7rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--red);margin-bottom:0.5rem}
+.page-hdr h2{font-size:1.5rem;font-weight:800;color:var(--navy);margin-bottom:0.35rem}
+.page-hdr p{font-size:0.82rem;color:var(--muted);line-height:1.5}
+.rcard{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.rcard-head{background:var(--red);padding:1.1rem 1.4rem;color:white;display:flex;align-items:center;gap:0.7rem}
+.rcard-head h3{font-size:0.9rem;font-weight:700}
+.rcard-head p{font-size:0.75rem;opacity:0.82;margin-top:0.1rem}
+.rcard-body{padding:1.4rem}
+.etype-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem}
+.etype-btn{padding:0.85rem 0.9rem;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--white);text-align:left;transition:all 0.15s;cursor:pointer}
+.etype-btn:hover,.etype-btn.selected{border-color:var(--red);background:var(--red-light)}
+.etype-emoji{font-size:1.3rem;display:block;margin-bottom:0.25rem}
+.etype-name{font-size:0.78rem;font-weight:700;color:var(--navy);display:block}
+.etype-desc{font-size:0.68rem;color:var(--muted);display:block;margin-top:0.05rem}
+.sev-row{display:flex;gap:0.5rem}
+.sev-btn{flex:1;padding:0.55rem 0.4rem;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--white);font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center}
+.sev-btn:nth-child(1):hover,.sev-btn:nth-child(1).selected{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.sev-btn:nth-child(2):hover,.sev-btn:nth-child(2).selected{border-color:var(--amber);background:var(--amber-light);color:var(--amber)}
+.sev-btn:nth-child(3):hover,.sev-btn:nth-child(3).selected{border-color:var(--red);background:var(--red-light);color:var(--red)}
+.gps-box{background:var(--off);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.9rem 1rem;display:flex;align-items:center;gap:0.7rem;cursor:pointer;transition:border-color 0.15s;margin-bottom:0.5rem}
+.gps-box:hover{border-color:var(--blue)}
+.gps-ico{width:34px;height:34px;background:var(--blue-light);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+.gps-txt strong{display:block;font-size:0.78rem;font-weight:600;color:var(--navy)}
+.gps-txt span{font-size:0.68rem;color:var(--muted)}
+.gps-st{margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--muted)}
+.gps-st.ok{color:var(--green)}
+
+/* success */
+.success-banner{background:var(--green);color:white;border-radius:var(--radius-lg);padding:1.4rem;text-align:center;margin-bottom:1.2rem}
+.success-banner div:first-child{font-size:1.8rem;margin-bottom:0.4rem}
+.success-banner strong{display:block;font-size:1rem;font-weight:800;margin-bottom:0.15rem}
+.success-banner span{font-size:0.78rem;opacity:0.85}
+.eta-card{background:var(--green-light);border:1px solid #a7f3d0;border-radius:var(--radius-sm);padding:1rem 1.1rem;display:flex;align-items:center;gap:0.85rem;margin-bottom:0.65rem}
+.eta-av{width:40px;height:40px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.9rem;flex-shrink:0}
+.eta-nm{font-size:0.85rem;font-weight:700;color:var(--navy)}
+.eta-rl{font-size:0.7rem;color:var(--muted);margin-top:0.05rem}
+.eta-t{margin-left:auto;text-align:right}
+.eta-t strong{font-size:1.1rem;font-weight:800;color:var(--green);display:block;font-family:var(--mono)}
+.eta-t span{font-size:0.65rem;color:var(--muted)}
+.hosp-alert{background:var(--blue-light);border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:0.75rem 1rem;font-size:0.75rem;color:var(--blue);font-weight:600;margin-bottom:1.2rem}
+.aid-box{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.2rem}
+.aid-box-head{padding:0.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.55rem;font-size:0.85rem;font-weight:700;color:var(--navy)}
+.aid-steps-wrap{padding:1.1rem}
+.aid-step{display:flex;gap:0.8rem;margin-bottom:0.9rem;align-items:flex-start}
+.aid-step:last-child{margin-bottom:0}
+.aid-step-n{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:800;flex-shrink:0;font-family:var(--mono)}
+.aid-step-n.red{background:var(--red-light);color:var(--red)}
+.aid-step-n.amber{background:var(--amber-light);color:var(--amber)}
+.aid-step-n.green{background:var(--green-light);color:var(--green)}
+.aid-step-body strong{display:block;font-size:0.8rem;font-weight:700;color:var(--navy);margin-bottom:0.12rem}
+.aid-step-body p{font-size:0.75rem;color:var(--muted);line-height:1.5}
+
+/* ══ VOLUNTEER ══ */
+.vol-layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 60px)}
+.vol-sidebar{background:var(--white);border-right:1px solid var(--border);padding:1.4rem;overflow-y:auto}
+.vol-profile-box{background:var(--green-light);border:1px solid #a7f3d0;border-radius:var(--radius-sm);padding:1.1rem;margin-bottom:1.3rem}
+.vol-av{width:44px;height:44px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;margin-bottom:0.7rem}
+.vol-name{font-size:0.9rem;font-weight:700;color:var(--navy)}
+.vol-role-text{font-size:0.72rem;color:var(--green);font-weight:600;margin-top:0.1rem}
+.vol-badges{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.7rem}
+.vol-badge{font-size:0.65rem;padding:0.18rem 0.55rem;border-radius:99px;font-weight:700;background:rgba(16,185,129,0.15);color:var(--green)}
+.vs-label{font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem;display:block}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 0.9rem;background:var(--off);border-radius:var(--radius-sm);border:1px solid var(--border);margin-bottom:1.3rem}
+.tr-info strong{display:block;font-size:0.8rem;font-weight:600;color:var(--navy)}
+.tr-info span{font-size:0.68rem;color:var(--muted)}
+.tgl{position:relative;width:42px;height:22px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-sl{position:absolute;inset:0;background:#cbd5e1;border-radius:99px;cursor:pointer;transition:background 0.2s}
+.tgl-sl::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:transform 0.2s}
+.tgl input:checked+.tgl-sl{background:var(--green)}
+.tgl input:checked+.tgl-sl::before{transform:translateX(20px)}
+.vol-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.3rem}
+.vstat{background:var(--off);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.8rem;text-align:center}
+.vstat-n{font-size:1.3rem;font-weight:800;color:var(--navy);font-family:var(--mono)}
+.vstat-l{font-size:0.65rem;color:var(--muted);margin-top:0.1rem;text-transform:uppercase;letter-spacing:0.04em}
+.vol-main{padding:1.4rem;background:var(--off);overflow-y:auto}
+.vm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.5rem}
+.vm-title{font-size:0.95rem;font-weight:700;color:var(--navy)}
+.vm-sub{font-size:0.75rem;color:var(--muted);margin-top:0.1rem}
+.inc-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:0.9rem;overflow:hidden;transition:box-shadow 0.2s}
+.inc-card:hover{box-shadow:var(--shadow-lg)}
+.inc-card.urgent{border-left:4px solid var(--red)}
+.inc-card.moderate{border-left:4px solid var(--amber)}
+.inc-card.mild{border-left:4px solid var(--green)}
+.inc-top{padding:0.95rem 1.1rem;display:flex;align-items:flex-start;gap:0.75rem}
+.inc-badge{padding:0.22rem 0.65rem;border-radius:99px;font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0;margin-top:2px}
+.inc-card.urgent .inc-badge{background:var(--red-light);color:var(--red)}
+.inc-card.moderate .inc-badge{background:var(--amber-light);color:var(--amber)}
+.inc-card.mild .inc-badge{background:var(--green-light);color:var(--green)}
+.inc-info{flex:1}
+.inc-title{font-size:0.85rem;font-weight:700;color:var(--navy);margin-bottom:0.18rem}
+.inc-loc{font-size:0.75rem;color:var(--muted);margin-bottom:0.35rem}
+.inc-meta{display:flex;gap:0.8rem;flex-wrap:wrap;align-items:center}
+.inc-time{font-size:0.68rem;color:var(--muted);font-family:var(--mono)}
+.inc-dist{font-size:0.68rem;font-weight:700;color:var(--blue)}
+.inc-btns{padding:0.8rem 1.1rem;border-top:1px solid var(--border);display:flex;gap:0.65rem;background:var(--off)}
+.ib{flex:1;padding:0.55rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:700;transition:opacity 0.15s;font-family:var(--font)}
+.ib:hover{opacity:0.85}
+.ib-accept{background:var(--green);color:white;border:none}
+.ib-pass{background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer}
+.ib-done{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0;cursor:default}
+
+/* ══ HOSPITAL ══ */
+.hosp-layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 60px)}
+.hosp-sb{background:var(--navy);color:white;padding:1.4rem;display:flex;flex-direction:column;gap:1.1rem;overflow-y:auto}
+.hs-name{font-size:0.95rem;font-weight:700}
+.hs-city{font-size:0.72rem;color:#64748b;margin-top:0.1rem}
+.hs-beds-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-sm);padding:1rem}
+.hs-beds-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;margin-bottom:0.65rem}
+.beds-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+.bed{background:rgba(255,255,255,0.05);border-radius:var(--radius-sm);padding:0.65rem;text-align:center}
+.bed-n{font-size:1.3rem;font-weight:800;font-family:var(--mono)}
+.bed.avail .bed-n{color:#34d399}
+.bed.occ .bed-n{color:#f87171}
+.bed-l{font-size:0.62rem;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;margin-top:0.05rem}
+.hs-nav{display:flex;flex-direction:column;gap:0.3rem}
+.hs-nav-btn{padding:0.65rem 0.85rem;border-radius:var(--radius-sm);background:transparent;border:none;color:#94a3b8;font-size:0.8rem;font-weight:500;text-align:left;display:flex;align-items:center;gap:0.65rem;transition:all 0.15s;cursor:pointer}
+.hs-nav-btn:hover,.hs-nav-btn.active{background:rgba(255,255,255,0.07);color:white}
+.hs-count{margin-left:auto;background:var(--red);color:white;font-size:0.6rem;font-weight:800;padding:0.12rem 0.45rem;border-radius:99px;font-family:var(--mono)}
+.hs-main{padding:1.4rem;background:var(--off);overflow-y:auto}
+.hm-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.3rem;flex-wrap:wrap;gap:0.75rem}
+.hm-title{font-size:0.95rem;font-weight:700;color:var(--navy)}
+.hm-sub{font-size:0.75rem;color:var(--muted);margin-top:0.1rem}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.9rem;margin-bottom:1.3rem}
+.scard{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem}
+.scard-n{font-size:1.7rem;font-weight:800;font-family:var(--mono);line-height:1;margin-bottom:0.2rem}
+.scard-l{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em}
+.scard-d{font-size:0.68rem;margin-top:0.35rem;font-weight:600}
+.scard-d.up{color:var(--red)} .scard-d.ok{color:var(--green)}
+.alert-table{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.2rem}
+.at-head{padding:0.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.at-head h4{font-size:0.82rem;font-weight:700;color:var(--navy)}
+.at-head span{font-size:0.7rem;color:var(--muted)}
+.at-row{padding:0.9rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.9rem;transition:background 0.15s}
+.at-row:hover{background:var(--off)}
+.at-row:last-child{border-bottom:none}
+.at-sev{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.at-sev.crit{background:var(--red)} .at-sev.mod{background:var(--amber)} .at-sev.low{background:var(--green)}
+.at-type{font-size:0.8rem;font-weight:700;color:var(--navy);min-width:115px}
+.at-loc{font-size:0.75rem;color:var(--muted);flex:1}
+.at-eta{font-size:0.75rem;font-weight:700;color:var(--blue);font-family:var(--mono);min-width:65px}
+.at-resp{font-size:0.7rem;color:var(--green);font-weight:600;min-width:75px}
+.at-time{font-size:0.68rem;color:var(--light);font-family:var(--mono);min-width:55px}
+.at-btn{padding:0.3rem 0.75rem;border-radius:var(--radius-sm);font-size:0.7rem;font-weight:700;flex-shrink:0;cursor:pointer;font-family:var(--font)}
+.at-prep{background:var(--blue-light);color:var(--blue);border:1px solid #bfdbfe}
+.at-ready{background:var(--green-light);color:var(--green);border:1px solid #a7f3d0;cursor:default}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(15,23,42,0.65);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--white);border-radius:var(--radius-lg);padding:1.8rem;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;position:relative}
+.modal-close-btn{position:absolute;top:1rem;right:1rem;background:var(--off);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:0.9rem;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal-h{margin-bottom:1.3rem}
+.modal-h h3{font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:0.25rem}
+.modal-h p{font-size:0.78rem;color:var(--muted)}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.45rem}
+.spec-btn{padding:0.5rem 0.7rem;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:0.72rem;font-weight:600;color:var(--muted);background:var(--white);cursor:pointer;transition:all 0.15s;text-align:left;font-family:var(--font)}
+.spec-btn:hover,.spec-btn.selected{border-color:var(--green);background:var(--green-light);color:var(--green)}
+
+@media(max-width:768px){
+  .vol-layout,.hosp-layout{grid-template-columns:1fr}
+  .vol-sidebar,.hosp-sb{display:none}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .topbar-nav .nav-btn:not(.btn-report-nav){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo" onclick="showPage('home')"><div class="logo-icon">FR</div>First<span>Reach</span></div>
+  <div class="topbar-nav">
+    <button class="nav-btn active" onclick="showPage('home')">Home</button>
+    <button class="nav-btn btn-report-nav" onclick="showPage('report')">🚨 Report Emergency</button>
+    <button class="nav-btn" onclick="showPage('volunteer')">Volunteer</button>
+    <button class="nav-btn" onclick="showPage('hospital')">Hospital</button>
+  </div>
+  <div class="live-badge"><div class="live-dot"></div><span id="lc">3</span> live</div>
+</div>
+
+<!-- ═══ HOME ═══ -->
+<div id="page-home" class="page active">
+  <div class="home-hero">
+    <div class="hero-inner">
+      <div class="hero-badge"><div class="hero-badge-dot"></div>India Emergency Network · Live</div>
+      <h1 class="hero-h">Help in minutes,<br>not <em>hours</em></h1>
+      <p class="hero-p">FirstReach connects accident victims with trained doctors and medical students nearby — before the ambulance even reaches the scene.</p>
+      <div class="hero-btns">
+        <button class="btn btn-red" onclick="showPage('report')">🚨 Report Emergency</button>
+        <button onclick="openReg()" style="background:rgba(255,255,255,0.1);color:white;padding:0.75rem 1.5rem;border-radius:var(--radius-sm);font-size:0.85rem;font-weight:600;border:1px solid rgba(255,255,255,0.2);cursor:pointer;font-family:var(--font)">Join as Volunteer</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-n">2,341</div><div class="hstat-l">Volunteers</div></div>
+        <div class="hstat"><div class="hstat-n">8 min</div><div class="hstat-l">Avg response</div></div>
+        <div class="hstat"><div class="hstat-n">1,204</div><div class="hstat-l">Lives helped</div></div>
+        <div class="hstat"><div class="hstat-n">47</div><div class="hstat-l">Hospitals</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-strip">
+    <div class="ls-head">
+      <h3>Live incidents near you</h3><span class="tag-pill red">Live</span>
+    </div>
+    <div class="ls-items">
+      <div class="ls-item cardiac" onclick="showPage('report')">
+        <div class="ls-type">❤️ Cardiac Event</div>
+        <div class="ls-loc">Connaught Place, Delhi</div>
+        <div class="ls-meta">3 min ago · 1.2 km</div>
+        <div class="ls-resp">✓ 2 volunteers responding</div>
+      </div>
+      <div class="ls-item accident" onclick="showPage('report')">
+        <div class="ls-type">🚗 Road Accident</div>
+        <div class="ls-loc">Outer Ring Road, Munirka</div>
+        <div class="ls-meta">7 min ago · 2.8 km</div>
+        <div class="ls-resp">✓ 1 volunteer responding</div>
+      </div>
+      <div class="ls-item seizure" onclick="showPage('report')">
+        <div class="ls-type">🧠 Seizure</div>
+        <div class="ls-loc">Lajpat Nagar Metro, Delhi</div>
+        <div class="ls-meta">12 min ago · 4.1 km</div>
+        <div class="ls-resp" style="color:var(--amber)">Awaiting volunteers</div>
+      </div>
+      <div class="ls-item accident" onclick="showPage('report')">
+        <div class="ls-type">🚗 Road Accident</div>
+        <div class="ls-loc">NH-48, near Mahipalpur</div>
+        <div class="ls-meta">18 min ago · 5.3 km</div>
+        <div class="ls-resp">✓ Ambulance en route</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="role-section">
+    <div class="role-section-head">
+      <h2>Choose your role</h2>
+      <p>Three portals, one mission — faster response, more lives saved</p>
+    </div>
+    <div class="role-cards">
+      <div class="role-card public" onclick="showPage('report')">
+        <div class="rc-icon">🚨</div>
+        <div class="rc-title">I need to report an emergency</div>
+        <div class="rc-desc">Witnessed an accident, cardiac event, or any medical emergency? Report in seconds — no login, no app download. Get real-time first-aid guidance while help is dispatched.</div>
+        <button class="rc-btn">Report Now →</button>
+      </div>
+      <div class="role-card volunteer" onclick="showPage('volunteer')">
+        <div class="rc-icon">🩺</div>
+        <div class="rc-title">I'm a doctor or medical student</div>
+        <div class="rc-desc">Register as a volunteer responder. Get instant alerts for emergencies within your radius so you can arrive and stabilise the patient before the ambulance gets there.</div>
+        <button class="rc-btn">Join as Volunteer →</button>
+      </div>
+      <div class="role-card hospital" onclick="showPage('hospital')">
+        <div class="rc-icon">🏥</div>
+        <div class="rc-title">I represent a hospital</div>
+        <div class="rc-desc">Get pre-alerts for incoming patients before they arrive. Know injury type, volunteer ETAs, and severity so your ER is prepared the moment the patient walks in.</div>
+        <button class="rc-btn">Hospital Dashboard →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REPORT ═══ -->
+<div id="page-report" class="page">
+  <div class="report-wrap">
+    <div id="rep-form">
+      <div class="page-hdr">
+        <div class="page-hdr-tag">Emergency Report</div>
+        <h2>Report an Emergency</h2>
+        <p>No login needed. Fill out quickly — volunteers and hospitals are alerted instantly.</p>
+      </div>
+      <div class="rcard">
+        <div class="rcard-head">
+          <div style="font-size:1.3rem">🚨</div>
+          <div><h3>What's happening?</h3><p>Select type and fill in details</p></div>
+        </div>
+        <div class="rcard-body">
+          <div class="form-group">
+            <label class="form-label">Emergency type</label>
+            <div class="etype-grid">
+              <button class="etype-btn selected" onclick="selType(this,'cardiac')"><span class="etype-emoji">❤️</span><span class="etype-name">Cardiac Event</span><span class="etype-desc">Chest pain, collapse</span></button>
+              <button class="etype-btn" onclick="selType(this,'accident')"><span class="etype-emoji">🚗</span><span class="etype-name">Road Accident</span><span class="etype-desc">Crash, trauma, bleeding</span></button>
+              <button class="etype-btn" onclick="selType(this,'seizure')"><span class="etype-emoji">🧠</span><span class="etype-name">Seizure / Stroke</span><span class="etype-desc">Convulsions, loss of control</span></button>
+              <button class="etype-btn" onclick="selType(this,'other')"><span class="etype-emoji">🏥</span><span class="etype-name">Other Emergency</span><span class="etype-desc">Breathing, injury, other</span></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Severity</label>
+            <div class="sev-row">
+              <button class="sev-btn" onclick="selSev(this)">Stable</button>
+              <button class="sev-btn" onclick="selSev(this)">Serious</button>
+              <button class="sev-btn selected" onclick="selSev(this)">Critical</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <div class="gps-box" onclick="getGPS()">
+              <div class="gps-ico">📍</div>
+              <div class="gps-txt"><strong>Use my GPS location</strong><span id="gps-lbl">Tap to auto-detect</span></div>
+              <div class="gps-st" id="gps-s">Detect →</div>
+            </div>
+            <input class="form-input" placeholder="Or type a landmark / address" id="loc-in"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">People affected</label>
+            <select class="form-select"><option>1 person</option><option>2–3 people</option><option>4+ people (mass casualty)</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Brief description (optional)</label>
+            <textarea class="form-input" rows="3" placeholder="e.g. Man unconscious on roadside, breathing but unresponsive..." style="resize:none;line-height:1.5"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your name (optional)</label>
+            <input class="form-input" placeholder="Helps volunteers know who's on scene"/>
+          </div>
+          <button class="btn btn-red btn-full" onclick="submitRep()" style="margin-top:0.3rem">🚨 Send Alert Now</button>
+          <p style="text-align:center;font-size:0.7rem;color:var(--muted);margin-top:0.6rem">Trained volunteers within 2 km and nearby hospitals are notified instantly</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="rep-success" class="hidden">
+      <div class="success-banner">
+        <div>✅</div>
+        <strong>Alert Sent Successfully</strong>
+        <span>Help is being coordinated right now</span>
+      </div>
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.7rem">Responders on the way</div>
+      <div class="eta-card">
+        <div class="eta-av">DR</div>
+        <div><div class="eta-nm">Dr. Rahul Sharma</div><div class="eta-rl">MBBS · Off-duty from Apollo Delhi</div></div>
+        <div class="eta-t"><strong id="eta1">4:32</strong><span>ETA</span></div>
+      </div>
+      <div class="eta-card">
+        <div class="eta-av" style="background:var(--blue)">MS</div>
+        <div><div class="eta-nm">Meghna Singh</div><div class="eta-rl">Final Year MBBS · AIIMS Delhi</div></div>
+        <div class="eta-t"><strong style="color:var(--blue);font-family:var(--mono);font-size:1.1rem;font-weight:800;display:block">6:47</strong><span>ETA</span></div>
+      </div>
+      <div class="hosp-alert">🏥 AIIMS Trauma Centre pre-alerted · ER bay being prepared now</div>
+      <div class="aid-box" id="aid-box">
+        <div class="aid-box-head"><span id="aid-icon">❤️</span><span id="aid-title">First Aid — Cardiac Event</span></div>
+        <div class="aid-steps-wrap" id="aid-steps"></div>
+      </div>
+      <button class="btn btn-outline btn-full" onclick="resetRep()">← Report another emergency</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VOLUNTEER ═══ -->
+<div id="page-volunteer" class="page">
+  <div class="vol-layout">
+    <div class="vol-sidebar">
+      <span class="vs-label">Your profile</span>
+      <div class="vol-profile-box">
+        <div class="vol-av">RS</div>
+        <div class="vol-name">Dr. Rahul Sharma</div>
+        <div class="vol-role-text">MBBS · 4 years experience</div>
+        <div class="vol-badges"><span class="vol-badge">Cardiology</span><span class="vol-badge">Trauma</span><span class="vol-badge">CPR</span></div>
+      </div>
+      <span class="vs-label">Availability</span>
+      <div class="toggle-row">
+        <div class="tr-info"><strong>Available to respond</strong><span>Turn off when busy</span></div>
+        <label class="tgl"><input type="checkbox" checked onchange="tglAvail(this)"/><span class="tgl-sl"></span></label>
+      </div>
+      <span class="vs-label">Your impact</span>
+      <div class="vol-stats-grid">
+        <div class="vstat"><div class="vstat-n">23</div><div class="vstat-l">Responses</div></div>
+        <div class="vstat"><div class="vstat-n">8.2</div><div class="vstat-l">Avg min</div></div>
+        <div class="vstat"><div class="vstat-n">19</div><div class="vstat-l">Resolved</div></div>
+        <div class="vstat"><div class="vstat-n">4.9★</div><div class="vstat-l">Rating</div></div>
+      </div>
+      <button onclick="openReg()" class="btn btn-outline btn-full" style="font-size:0.75rem;padding:0.55rem">Edit profile</button>
+    </div>
+    <div class="vol-main">
+      <div class="vm-head">
+        <div><div class="vm-title">Nearby Emergencies</div><div class="vm-sub">Within your 2 km radius — respond instantly</div></div>
+        <span class="tag-pill green" id="avail-badge">● Available</span>
+      </div>
+      <div id="vol-list">
+        <div class="inc-card urgent">
+          <div class="inc-top">
+            <span class="inc-badge">❤️ Cardiac</span>
+            <div class="inc-info">
+              <div class="inc-title">Cardiac arrest — person unconscious, not breathing</div>
+              <div class="inc-loc">📍 Connaught Place, Block A · near Metro Gate 5, Delhi</div>
+              <div class="inc-meta"><span class="inc-time">2 min ago</span><span class="inc-dist">1.2 km away</span><span class="tag-pill red">Critical</span></div>
+            </div>
+          </div>
+          <div class="inc-btns">
+            <button class="ib ib-accept" onclick="acceptInc(this)">✓ Accept & Go</button>
+            <button class="ib ib-pass" onclick="passInc(this)">Pass</button>
+          </div>
+        </div>
+        <div class="inc-card moderate">
+          <div class="inc-top">
+            <span class="inc-badge">🚗 Accident</span>
+            <div class="inc-info">
+              <div class="inc-title">Road accident — 2 injured, visible bleeding</div>
+              <div class="inc-loc">📍 Outer Ring Road · near Munirka flyover, Delhi</div>
+              <div class="inc-meta"><span class="inc-time">8 min ago</span><span class="inc-dist">1.9 km away</span><span class="tag-pill amber">Serious</span></div>
+            </div>
+          </div>
+          <div class="inc-btns">
+            <button class="ib ib-accept" onclick="acceptInc(this)">✓ Accept & Go</button>
+            <button class="ib ib-pass" onclick="passInc(this)">Pass</button>
+          </div>
+        </div>
+        <div class="inc-card mild">
+          <div class="inc-top">
+            <span class="inc-badge">🧠 Seizure</span>
+            <div class="inc-info">
+              <div class="inc-title">Seizure at metro station — now stable, monitoring</div>
+              <div class="inc-loc">📍 Lajpat Nagar Metro Station · Platform 2, Delhi</div>
+              <div class="inc-meta"><span class="inc-time">15 min ago</span><span class="inc-dist">2.1 km away</span><span class="tag-pill green">Stable</span></div>
+            </div>
+          </div>
+          <div class="inc-btns">
+            <button class="ib ib-accept" onclick="acceptInc(this)">✓ Accept & Go</button>
+            <button class="ib ib-pass" onclick="passInc(this)">Pass</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOSPITAL ═══ -->
+<div id="page-hospital" class="page">
+  <div class="hosp-layout">
+    <div class="hosp-sb">
+      <div><div style="font-size:1.2rem;margin-bottom:0.5rem">🏥</div><div class="hs-name">AIIMS Trauma Centre</div><div class="hs-city">New Delhi · Emergency Dept.</div></div>
+      <div class="hs-beds-card">
+        <div class="hs-beds-label">Bed availability — live</div>
+        <div class="beds-grid">
+          <div class="bed avail"><div class="bed-n">4</div><div class="bed-l">Trauma beds</div></div>
+          <div class="bed avail"><div class="bed-n">2</div><div class="bed-l">ICU slots</div></div>
+          <div class="bed occ"><div class="bed-n">8</div><div class="bed-l">Occupied</div></div>
+          <div class="bed avail"><div class="bed-n">1</div><div class="bed-l">OT ready</div></div>
+        </div>
+      </div>
+      <div class="hs-nav">
+        <button class="hs-nav-btn active">🔔 Incoming alerts<span class="hs-count">3</span></button>
+        <button class="hs-nav-btn">📋 Active cases<span class="hs-count">2</span></button>
+        <button class="hs-nav-btn">📊 Today's log</button>
+        <button class="hs-nav-btn">⚙️ Settings</button>
+      </div>
+      <div style="margin-top:auto;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.07)">
+        <div style="font-size:0.65rem;color:#475569;margin-bottom:0.35rem">On-call tonight</div>
+        <div style="font-size:0.78rem;color:#94a3b8;font-weight:600">Dr. Anita Verma</div>
+        <div style="font-size:0.68rem;color:#475569">Trauma Surgeon</div>
+        <div style="margin-top:0.4rem;font-size:0.78rem;color:#94a3b8;font-weight:600">Dr. Karan Malhotra</div>
+        <div style="font-size:0.68rem;color:#475569">Emergency Medicine</div>
+      </div>
+    </div>
+    <div class="hs-main">
+      <div class="hm-bar">
+        <div><div class="hm-title">Incoming Emergency Alerts</div><div class="hm-sub">Real-time pre-alerts · <span style="font-family:var(--mono);color:var(--blue)" id="h-clock"></span></div></div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+          <span class="tag-pill green">● System active</span>
+          <button class="btn btn-red" style="font-size:0.75rem;padding:0.45rem 1rem">Update beds</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="scard"><div class="scard-n" style="color:var(--red)">3</div><div class="scard-l">Active alerts</div><div class="scard-d up">↑ 1 new / 10 min</div></div>
+        <div class="scard"><div class="scard-n" style="color:var(--green)">8 min</div><div class="scard-l">Pre-alert avg</div><div class="scard-d ok">Before arrival</div></div>
+        <div class="scard"><div class="scard-n" style="color:var(--blue)">5</div><div class="scard-l">Volunteers nearby</div><div class="scard-d ok">2 responded today</div></div>
+        <div class="scard"><div class="scard-n">17</div><div class="scard-l">Cases today</div><div class="scard-d ok">↓ 3 from yesterday</div></div>
+      </div>
+      <div class="alert-table">
+        <div class="at-head"><h4>Live incident feed</h4><span style="color:var(--green);font-size:0.7rem;font-weight:600">● Auto-updating</span></div>
+        <div class="at-row">
+          <div class="at-sev crit"></div>
+          <div class="at-type">❤️ Cardiac Arrest</div>
+          <div class="at-loc">📍 Connaught Place, Block A</div>
+          <div class="at-eta">~6 min</div>
+          <div class="at-resp">2 volunteers →</div>
+          <div class="at-time">2m ago</div>
+          <button class="at-btn at-prep" onclick="mReady(this)">Prepare ER</button>
+        </div>
+        <div class="at-row">
+          <div class="at-sev mod"></div>
+          <div class="at-type">🚗 Road Trauma</div>
+          <div class="at-loc">📍 Outer Ring Rd, Munirka</div>
+          <div class="at-eta">~14 min</div>
+          <div class="at-resp">1 volunteer →</div>
+          <div class="at-time">8m ago</div>
+          <button class="at-btn at-ready">✓ Bay ready</button>
+        </div>
+        <div class="at-row">
+          <div class="at-sev low"></div>
+          <div class="at-type">🧠 Seizure</div>
+          <div class="at-loc">📍 Lajpat Nagar Metro</div>
+          <div class="at-eta">~18 min</div>
+          <div class="at-resp">On scene →</div>
+          <div class="at-time">15m ago</div>
+          <button class="at-btn at-prep" onclick="mReady(this)">Prepare ER</button>
+        </div>
+      </div>
+      <div class="alert-table">
+        <div class="at-head"><h4>Resolved today</h4><span style="font-size:0.7rem;color:var(--muted)">Last 6 hours</span></div>
+        <div class="at-row" style="opacity:0.6">
+          <div class="at-sev crit"></div>
+          <div class="at-type">❤️ Cardiac</div>
+          <div class="at-loc">Karol Bagh · Admitted ICU</div>
+          <div class="at-eta">Admitted</div>
+          <div class="at-resp">Outcome: Stable</div>
+          <div class="at-time">2h ago</div>
+          <span class="tag-pill green">Resolved</span>
+        </div>
+        <div class="at-row" style="opacity:0.6">
+          <div class="at-sev mod"></div>
+          <div class="at-type">🚗 Accident</div>
+          <div class="at-loc">NH-48 · 3 patients, discharged</div>
+          <div class="at-eta">Discharged</div>
+          <div class="at-resp">Outcome: Good</div>
+          <div class="at-time">4h ago</div>
+          <span class="tag-pill green">Resolved</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VOLUNTEER REGISTER MODAL -->
+<div class="modal-ov" id="vol-modal">
+  <div class="modal-box">
+    <button class="modal-close-btn" onclick="closeReg()">✕</button>
+    <div class="modal-h"><h3>Register as Volunteer</h3><p>Join 2,341 medical professionals saving lives across Delhi</p></div>
+    <div class="form-group"><label class="form-label">Full name</label><input class="form-input" placeholder="Your full name"/></div>
+    <div class="form-group"><label class="form-label">Role</label><select class="form-select"><option>MBBS Doctor</option><option>Final Year Medical Student</option><option>3rd Year Medical Student</option><option>Nurse / Paramedic</option><option>Trained First Aider</option></select></div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" placeholder="+91 9XXXXXXXXX" type="tel"/></div>
+    <div class="form-group">
+      <label class="form-label">Specialties / expertise</label>
+      <div class="spec-grid">
+        <button class="spec-btn selected" onclick="this.classList.toggle('selected')">❤️ Cardiology</button>
+        <button class="spec-btn" onclick="this.classList.toggle('selected')">🦴 Trauma / Ortho</button>
+        <button class="spec-btn selected" onclick="this.classList.toggle('selected')">🫁 Emergency Med</button>
+        <button class="spec-btn" onclick="this.classList.toggle('selected')">🧠 Neurology</button>
+        <button class="spec-btn" onclick="this.classList.toggle('selected')">👶 Paediatrics</button>
+        <button class="spec-btn selected" onclick="this.classList.toggle('selected')">💊 General / CPR</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Alert radius: <span id="rval" style="color:var(--blue);font-family:var(--mono)">2 km</span></label><input type="range" min="1" max="5" value="2" step="0.5" style="width:100%;accent-color:var(--blue)" oninput="document.getElementById('rval').textContent=this.value+' km'"/></div>
+    <div class="form-group"><label class="form-label">Medical registration / college ID</label><input class="form-input" placeholder="NMC number or student ID"/></div>
+    <button class="btn btn-green btn-full" onclick="doReg()" style="margin-top:0.5rem">Join FirstReach →</button>
+    <p style="text-align:center;font-size:0.68rem;color:var(--muted);margin-top:0.6rem">Credentials verified within 24h. You'll get push alerts for nearby emergencies.</p>
+  </div>
+</div>
+
+<script>
+/* ROUTING */
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  const idx={home:0,report:1,volunteer:2,hospital:3};
+  document.querySelectorAll('.nav-btn')[idx[n]]?.classList.add('active');
+}
+
+/* HOSPITAL CLOCK */
+function tick(){const d=new Date();document.getElementById('h-clock').textContent=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+setInterval(tick,1000);tick();
+
+/* EMERGENCY TYPE */
+let selEtype='cardiac';
+function selType(btn,t){document.querySelectorAll('.etype-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selEtype=t;}
+
+/* SEVERITY */
+function selSev(btn){document.querySelectorAll('.sev-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');}
+
+/* GPS */
+function getGPS(){
+  const s=document.getElementById('gps-s'),l=document.getElementById('gps-lbl');
+  s.textContent='Detecting...';
+  navigator.geolocation?.getCurrentPosition(p=>{
+    s.classList.add('ok');s.textContent='✓ Found';
+    l.textContent='28.6139°N, 77.2090°E · New Delhi';
+    document.getElementById('loc-in').value='Connaught Place, New Delhi';
+  },()=>{s.textContent='Use address →';l.textContent='GPS unavailable'});
+}
+
+/* FIRST AID DATA */
+const AID={
+  cardiac:{icon:'❤️',title:'First Aid — Cardiac Event',steps:[
+    {c:'red',t:'Call 112 immediately',d:'If not done, call 112 now. Say "cardiac arrest" and your exact location.'},
+    {c:'red',t:'Check responsiveness',d:'Tap shoulders, shout "Are you okay?" — if no response, start CPR now.'},
+    {c:'amber',t:'Start chest compressions',d:'Heel of hand on centre of chest. Push 5–6 cm deep, 100–120 times/min. Don\'t stop.'},
+    {c:'amber',t:'Rescue breaths (if trained)',d:'Every 30 compressions — tilt head back, lift chin, give 2 breaths into mouth.'},
+    {c:'green',t:'Keep going',d:'Do not stop until Dr. Sharma arrives. You are keeping them alive.'},
+  ]},
+  accident:{icon:'🚗',title:'First Aid — Road Accident',steps:[
+    {c:'red',t:'Do not move the victim',d:'Unless immediate danger. Moving can worsen spinal injuries.'},
+    {c:'red',t:'Control bleeding',d:'Apply firm, constant pressure with any cloth. Press hard, don\'t release. Elevate the limb if possible.'},
+    {c:'amber',t:'Check breathing',d:'Watch for chest rise. If not breathing — tilt head, give 2 rescue breaths.'},
+    {c:'amber',t:'Keep them warm',d:'Cover with jacket. Speak calmly: "Help is coming. You\'re safe."'},
+    {c:'green',t:'Clear space',d:'Ask bystanders to stop traffic and create a path for the arriving responder.'},
+  ]},
+  seizure:{icon:'🧠',title:'First Aid — Seizure',steps:[
+    {c:'red',t:'Do NOT restrain them',d:'Never hold down someone seizing. Clear objects around them instead.'},
+    {c:'red',t:'Protect the head',d:'Place something soft under their head. Remove glasses.'},
+    {c:'amber',t:'Time the seizure',d:'If it goes beyond 5 minutes without stopping — this is a medical emergency.'},
+    {c:'amber',t:'Recovery position',d:'Once convulsions stop — gently roll them on their side to prevent choking.'},
+    {c:'green',t:'Stay and reassure',d:'Talk calmly when they\'re conscious. They may be confused. Help is coming.'},
+  ]},
+  other:{icon:'🏥',title:'First Aid — General Emergency',steps:[
+    {c:'red',t:'Ensure scene safety',d:'Check for hazards before approaching. Your safety first.'},
+    {c:'amber',t:'Check responsiveness',d:'Tap and shout. Check breathing. If unconscious and not breathing — start CPR.'},
+    {c:'amber',t:'Control any bleeding',d:'Apply firm pressure with the cleanest material available.'},
+    {c:'green',t:'Stay with them',d:'Keep them conscious and calm. Your volunteer is on the way.'},
+  ]},
+};
+
+function loadAid(type){
+  const a=AID[type]||AID.other;
+  document.getElementById('aid-icon').textContent=a.icon;
+  document.getElementById('aid-title').textContent=a.title;
+  document.getElementById('aid-steps').innerHTML=a.steps.map((s,i)=>`
+    <div class="aid-step">
+      <div class="aid-step-n ${s.c}">${i+1}</div>
+      <div class="aid-step-body"><strong>${s.t}</strong><p>${s.d}</p></div>
+    </div>`).join('');
+}
+
+/* SUBMIT REPORT */
+function submitRep(){
+  document.getElementById('rep-form').classList.add('hidden');
+  document.getElementById('rep-success').classList.remove('hidden');
+  loadAid(selEtype);
+  startETA();
+  document.getElementById('lc').textContent=parseInt(document.getElementById('lc').textContent)+1;
+}
+function resetRep(){
+  document.getElementById('rep-form').classList.remove('hidden');
+  document.getElementById('rep-success').classList.add('hidden');
+}
+
+/* ETA COUNTDOWN */
+function startETA(){
+  let s=272;const el=document.getElementById('eta1');
+  const t=setInterval(()=>{
+    if(s<=0){clearInterval(t);el.textContent='Here!';el.style.color='var(--blue)';return}
+    s--;const m=Math.floor(s/60),sec=s%60;
+    el.textContent=m+':'+(sec<10?'0':'')+sec;
+  },1000);
+}
+
+/* VOLUNTEER */
+function acceptInc(btn){
+  btn.textContent='✓ Responding';btn.className='ib ib-done';
+  btn.nextElementSibling?.remove();
+  setTimeout(()=>{btn.closest('.inc-card').style.opacity='0.45';btn.closest('.inc-card').style.transition='opacity 0.4s'},3000);
+}
+function passInc(btn){btn.closest('.inc-card').style.opacity='0.35';btn.closest('.inc-card').style.transition='opacity 0.3s';}
+function tglAvail(inp){
+  const b=document.getElementById('avail-badge');
+  b.textContent=inp.checked?'● Available':'○ Unavailable';
+  b.className='tag-pill '+(inp.checked?'green':'amber');
+}
+
+/* HOSPITAL */
+function mReady(btn){btn.textContent='✓ Bay ready';btn.className='at-btn at-ready';}
+
+/* MODAL */
+function openReg(){document.getElementById('vol-modal').classList.add('open')}
+function closeReg(){document.getElementById('vol-modal').classList.remove('open')}
+function doReg(){closeReg();showPage('volunteer');alert('✅ Welcome to FirstReach!\n\nYour profile is under verification.\nYou\'ll receive emergency alerts within 24 hours.');}
+</script>
+</body>
+</html>
